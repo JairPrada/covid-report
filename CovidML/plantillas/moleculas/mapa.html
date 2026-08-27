@@ -1,28 +1,48 @@
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/jsvectormap/dist/jsvectormap.css" />
 <style>
   html, body { margin: 0; padding: 0; background: #0b1220; font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
   .navbar { position: relative; z-index: 1100; }
-  #globe { position: fixed; top: 0; left: 0; height: 100vh; width: 100%; z-index: 1; }
+  #mapa { position: fixed; inset: 0; z-index: 1; }
 
   .panel {
-    position: fixed; top: 64px; left: 16px; z-index: 1000; width: 296px;
+    position: fixed; top: 64px; left: 16px; z-index: 1000; width: 304px;
     padding: 18px 20px 16px; border-radius: 16px;
     background: rgba(2, 6, 23, 0.78); border: 1px solid rgba(148, 163, 184, 0.18);
     backdrop-filter: blur(12px); color: #e2e8f0;
   }
   .eyebrow { font-size: 10px; letter-spacing: 2.4px; text-transform: uppercase; color: #64748b; margin: 0 0 6px; }
   .title { margin: 0 0 14px; font-size: 20px; font-weight: 700; color: #f1f5f9; }
-  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 12px; }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
   .metric .k { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: #64748b; }
-  .metric .v { font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .metric .v { font-size: 16px; font-weight: 600; font-variant-numeric: tabular-nums; margin-top: 2px; }
   .v.cases { color: #fda4af; } .v.deaths { color: #cbd5e1; } .v.rec { color: #6ee7b7; } .v.count { color: #bae6fd; }
+
+  .seg-group { display: flex; gap: 8px; margin: 14px 0 0; }
+  .seg {
+    flex: 1; padding: 8px 0; background: rgba(30, 41, 59, 0.6); border: 1px solid rgba(148, 163, 184, 0.25);
+    color: #94a3b8; border-radius: 8px; cursor: pointer; font-size: 12px; font-weight: 600; font-family: Inter, sans-serif;
+  }
+  .seg.active { background: #1e293b; color: #f1f5f9; border-color: #64748b; }
+
   .sep { height: 1px; background: rgba(148, 163, 184, 0.2); margin: 14px 0 12px; }
   .legend { display: flex; flex-direction: column; gap: 7px; }
   .legend .row { display: flex; align-items: center; font-size: 11px; color: #94a3b8; }
-  .legend .sw { width: 9px; height: 9px; border-radius: 50%; margin-right: 9px; }
+  .legend .sw { width: 9px; height: 9px; border-radius: 50%; margin-right: 9px; flex-shrink: 0; }
   .hint { margin-top: 14px; font-size: 10px; color: #64748b; }
+  .note { margin-top: 4px; font-size: 10px; color: #475569; }
+
+  .jvm-tooltip {
+    background: #0b1220 !important; color: #e2e8f0 !important;
+    border: 1px solid rgba(148, 163, 184, 0.35) !important; border-radius: 10px !important;
+    padding: 10px 12px !important; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5) !important;
+    font-family: Inter, sans-serif !important; font-size: 12px !important;
+  }
+  .jvm-zoom-btn { background: #1e293b !important; color: #e2e8f0 !important; border: 1px solid rgba(148, 163, 184, 0.3) !important; border-radius: 6px !important; }
+  .jvm-zoom-btn.jvm-zoomin { border-radius: 6px 6px 0 0 !important; }
+  .jvm-zoom-btn.jvm-zoomout { border-radius: 0 0 6px 6px !important; }
 </style>
 
 <div class="panel">
@@ -36,97 +56,115 @@
       <div class="metric"><div class="k">Recuperados</div><div class="v rec" id="m-rec">—</div></div>
     </div>
   </div>
+  <div class="seg-group">
+    <button class="seg active" id="btn-casos" onclick="cambiar('casos')">Casos</button>
+    <button class="seg" id="btn-prob" onclick="cambiar('prob')">Probabilidad</button>
+  </div>
   <div class="sep"></div>
   <div class="legend">
-    <div class="row"><span class="sw" style="background:#38bdf8"></span> &lt; 100 mil casos</div>
-    <div class="row"><span class="sw" style="background:#818cf8"></span> &lt; 500 mil</div>
-    <div class="row"><span class="sw" style="background:#c084fc"></span> &lt; 2 millones</div>
-    <div class="row"><span class="sw" style="background:#f472b6"></span> &lt; 10 millones</div>
-    <div class="row"><span class="sw" style="background:#fb7185"></span> &gt; 10 millones</div>
+    <div class="row"><span class="sw" style="background:#38bdf8"></span><span id="lg1">&lt; 100 mil casos</span></div>
+    <div class="row"><span class="sw" style="background:#818cf8"></span><span id="lg2">&lt; 500 mil</span></div>
+    <div class="row"><span class="sw" style="background:#c084fc"></span><span id="lg3">&lt; 2 millones</span></div>
+    <div class="row"><span class="sw" style="background:#f472b6"></span><span id="lg4">&lt; 10 millones</span></div>
+    <div class="row"><span class="sw" style="background:#fb7185"></span><span id="lg5">&gt; 10 millones</span></div>
   </div>
-  <div class="hint">Arrastra para girar · rueda para zoom · cursor sobre una barra</div>
+  <div class="hint">Arrastra para mover · rueda para zoom · cursor sobre un país</div>
+  <div class="note">Probabilidad = casos / población · Datos: disease.sh</div>
 </div>
 
-<div id="globe"></div>
+<div id="mapa"></div>
 
-<script src="//unpkg.com/globe.gl"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsvectormap/dist/jsvectormap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/jsvectormap/dist/maps/world.js"></script>
 <script>
-  function colorPorCasos(c) {
-    if (c >= 10000000) return '#fb7185';
-    if (c >= 1000000) return '#f472b6';
-    if (c >= 200000) return '#c084fc';
-    if (c >= 100000) return '#818cf8';
-    return '#38bdf8';
-  }
-  function alturaBarra(c) { return Math.min(0.6, 0.15 + 0.85 * (Math.log10(c + 1) - 3) / 5); }
+  var escala = { 1: '#38bdf8', 2: '#818cf8', 3: '#c084fc', 4: '#f472b6', 5: '#fb7185' };
 
-  var world = null;
-  if (typeof Globe !== 'undefined') {
-    world = Globe()(document.getElementById('globe'))
-      .backgroundColor('#0b1220')
-      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
-      .showAtmosphere(true)
-      .atmosphereColor('#7dd3fc')
-      .atmosphereAltitude(0.15)
-      .barLat('lat').barLng('lng')
-      .barAltitude('alt').barRadius(0.7)
-      .barColor('color')
-      .barLabel(function (d) {
-        return '<div style="font-family:Inter,system-ui;background:#0b1220;color:#e2e8f0;' +
-          'padding:9px 11px;border-radius:11px;border:1px solid rgba(148,163,184,.3);min-width:196px">' +
-          '<strong style="font-size:13px">' + d.country + '</strong><br>' +
-          '<span style="color:#fda4af">Confirmados: ' + d.cases.toLocaleString('es') + '</span><br>' +
-          '<span style="color:#cbd5e1">Muertos: ' + d.deaths.toLocaleString('es') + '</span><br>' +
-          '<span style="color:#6ee7b7">Recuperados: ' + d.recovered.toLocaleString('es') + '</span><br>' +
-          '<span style="color:#7dd3fc">Hoy: +' + d.todayCases.toLocaleString('es') + '</span>' +
-          '</div>';
-      });
-    world.width(window.innerWidth).height(window.innerHeight);
-    world.controls().autoRotate = true;
-    world.controls().autoRotateSpeed = 0.55;
-    world.controls().enableZoom = true;
-    world.pointOfView({ lat: 12, lng: -20, altitude: 2.4 }, 0);
-    window.addEventListener('resize', function () { world.width(window.innerWidth).height(window.innerHeight); });
-  } else {
-    document.getElementById('globe').innerHTML =
-      '<div style="color:#94a3b8;font-family:Inter;padding:40px">No se pudo cargar el globo (CDN).</div>';
+  var mapa = new jsVectorMap({
+    selector: '#mapa',
+    map: 'world',
+    backgroundColor: '#0b1220',
+    zoomButtons: true,
+    zoomOnScroll: false,
+    regionStyle: {
+      initial: { fill: '#223047', stroke: '#0b1220', strokeWidth: 0.4 },
+      hover: { fill: '#4b5563', cursor: 'pointer' }
+    },
+    series: {
+      regions: [{ attribute: 'fill', scale: escala, values: {} }]
+    },
+    onRegionTooltipShow: function (event, tooltip, code) {
+      var d = datosPorCode[code];
+      if (!d) return;
+      var p = d.cases / (d.population || 1);
+      var cat = catProb(p);
+      tooltip.text(
+        '<div style="font-family:Inter,sans-serif;min-width:205px">' +
+        '<strong style="font-size:13px;color:#f1f5f9">' + d.country + '</strong><br>' +
+        '<span style="color:#fda4af">Confirmados: ' + fmt(d.cases) + '</span><br>' +
+        '<span style="color:#cbd5e1">Muertos: ' + fmt(d.deaths) + '</span><br>' +
+        '<span style="color:#6ee7b7">Recuperados: ' + fmt(d.recovered) + '</span><br>' +
+        '<span style="color:#94a3b8">Población: ' + fmt(d.population) + '</span><br>' +
+        '<span style="color:' + cat[1] + '">Prob. contagio: ' + (p * 100).toFixed(1) + '% · ' + cat[0] + '</span>' +
+        '</div>', true);
+    }
+  });
+
+  var datosPorCode = {}, valoresCasos = {}, valoresProb = {};
+  var modo = 'casos';
+
+  function fmt(n) { return (n || 0).toLocaleString('es'); }
+  function bucketCasos(c) {
+    if (c >= 10000000) return 5;
+    if (c >= 1000000) return 4;
+    if (c >= 200000) return 3;
+    if (c >= 100000) return 2;
+    return 1;
+  }
+  function catProb(p) {
+    if (p >= 0.5) return ['Crítico', '#fb7185'];
+    if (p >= 0.3) return ['Muy alto', '#f472b6'];
+    if (p >= 0.15) return ['Alto', '#c084fc'];
+    if (p >= 0.05) return ['Medio', '#818cf8'];
+    return ['Bajo', '#38bdf8'];
+  }
+  function bucketProb(p) {
+    if (p >= 0.5) return 5;
+    if (p >= 0.3) return 4;
+    if (p >= 0.15) return 3;
+    if (p >= 0.05) return 2;
+    return 1;
+  }
+
+  function cambiar(m) {
+    modo = m;
+    mapa.series.regions[0].setValues(m === 'casos' ? valoresCasos : valoresProb);
+    document.getElementById('btn-casos').className = 'seg' + (m === 'casos' ? ' active' : '');
+    document.getElementById('btn-prob').className = 'seg' + (m === 'prob' ? ' active' : '');
+    var labels = m === 'casos'
+      ? ['&lt; 100 mil casos', '&lt; 500 mil', '&lt; 2 millones', '&lt; 10 millones', '&gt; 10 millones']
+      : ['&lt; 5% · Bajo', '&lt; 15% · Medio', '&lt; 30% · Alto', '&lt; 50% · Muy alto', '&ge; 50% · Crítico'];
+    for (var i = 1; i <= 5; i++) document.getElementById('lg' + i).innerHTML = labels[i - 1];
   }
 
   async function cargar() {
     try {
       const res = await fetch('https://disease.sh/v3/covid-19/countries?sort=cases');
       const datos = await res.json();
-      const barras = [], anillos = [], etiquetas = [];
       let tc = 0, td = 0, tr = 0, n = 0;
       datos.forEach(function (d) {
-        const lat = d.countryInfo.lat, lng = d.countryInfo.long;
-        if (!lat && !lng) return;
+        const iso2 = d.countryInfo.iso2;
+        if (!iso2 || !d.countryInfo.lat && !d.countryInfo.long) return;
         tc += d.cases; td += d.deaths; tr += d.recovered; n++;
-        const p = {
-          lat: lat, lng: lng, country: d.country,
-          cases: d.cases, deaths: d.deaths, recovered: d.recovered, todayCases: d.todayCases,
-          color: colorPorCasos(d.cases), alt: alturaBarra(d.cases)
-        };
-        barras.push(p);
-        if (n <= 15) anillos.push({ lat: lat, lng: lng, color: colorPorCasos(d.cases) });
-        if (n <= 12) etiquetas.push({ lat: lat, lng: lng, country: d.country, color: colorPorCasos(d.cases) });
+        const p = d.cases / (d.population || 1);
+        datosPorCode[iso2] = { country: d.country, cases: d.cases, deaths: d.deaths, recovered: d.recovered, population: d.population };
+        valoresCasos[iso2] = bucketCasos(d.cases);
+        valoresProb[iso2] = bucketProb(p);
       });
-
-      document.getElementById('m-count').textContent = n.toLocaleString('es');
-      document.getElementById('m-cases').textContent = tc.toLocaleString('es');
-      document.getElementById('m-deaths').textContent = td.toLocaleString('es');
-      document.getElementById('m-rec').textContent = tr.toLocaleString('es');
-
-      if (world) {
-        try {
-          world.barsData(barras);
-          world.ringsData(anillos).ringColor('color').ringMaxRadius(4).ringPropagationSpeed(2).ringRepeatPeriod(900);
-        } catch (e) { console.error('barras/anillos', e); }
-        try {
-          world.labelsData(etiquetas).labelLat('lat').labelLng('lng')
-            .labelText('country').labelSize(0.9).labelColor('color').labelDotRadius(0.3);
-        } catch (e) { console.error('etiquetas', e); }
-      }
+      document.getElementById('m-count').textContent = fmt(n);
+      document.getElementById('m-cases').textContent = fmt(tc);
+      document.getElementById('m-deaths').textContent = fmt(td);
+      document.getElementById('m-rec').textContent = fmt(tr);
+      mapa.series.regions[0].setValues(valoresCasos);
     } catch (e) {
       document.getElementById('m-count').textContent = 'Error al cargar';
     }
