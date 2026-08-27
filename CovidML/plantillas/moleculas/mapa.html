@@ -1,32 +1,62 @@
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
-  html, body { margin: 0; padding: 0; background: #060912; }
-  #globe { position: fixed; top: 0; left: 0; height: 100vh; width: 100%; }
-  .panel-covid {
-    position: fixed; top: 64px; left: 14px; z-index: 1000; width: 300px;
-    background: rgba(15, 23, 42, 0.78); backdrop-filter: blur(10px);
-    color: #e2e8f0; border: 1px solid rgba(148, 163, 184, 0.18);
-    border-radius: 16px; padding: 16px 18px; box-shadow: 0 12px 36px rgba(0, 0, 0, 0.45);
-    font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  html, body { margin: 0; padding: 0; background: #060912; font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  .navbar { position: relative; z-index: 1100; }
+  #globe { position: fixed; top: 0; left: 0; height: 100vh; width: 100%; z-index: 1; }
+
+  .panel {
+    position: fixed; top: 64px; left: 16px; z-index: 1000; width: 296px;
+    padding: 20px 20px 16px; border-radius: 20px;
+    background: rgba(2, 6, 23, 0.55); border: 1px solid rgba(148, 163, 184, 0.14);
+    backdrop-filter: blur(14px) saturate(140%);
+    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
+    color: #e2e8f0;
   }
-  .panel-covid h5 { margin: 0 0 10px; font-weight: 700; letter-spacing: 0.3px; color: #f8fafc; }
-  .stat { display: flex; justify-content: space-between; font-size: 13px; margin: 4px 0; color: #cbd5e1; }
-  .stat b { font-variant-numeric: tabular-nums; color: #f1f5f9; }
-  .legend { margin-top: 12px; font-size: 11px; line-height: 1.8; color: #94a3b8; }
-  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 7px; vertical-align: middle; box-shadow: 0 0 8px currentColor; }
-  .hint { margin-top: 10px; font-size: 10.5px; color: #64748b; }
+  .panel::before {
+    content: ""; position: absolute; inset: 0; border-radius: 20px; padding: 1px;
+    background: linear-gradient(135deg, rgba(56,189,248,0.35), rgba(192,132,252,0.25), rgba(251,113,133,0.30));
+    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+  }
+  .eyebrow { font-size: 10px; letter-spacing: 2.4px; text-transform: uppercase; color: #64748b; margin: 0 0 4px; }
+  .title {
+    margin: 0 0 16px; font-size: 22px; font-weight: 700; line-height: 1.1; letter-spacing: -0.3px;
+    background: linear-gradient(92deg, #7dd3fc, #c4b5fd 60%, #fda4af);
+    -webkit-background-clip: text; background-clip: text; color: transparent;
+  }
+  .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 12px; }
+  .metric .k { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: #64748b; }
+  .metric .v { font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; margin-top: 2px; }
+  .v.cases { color: #fda4af; } .v.deaths { color: #cbd5e1; } .v.rec { color: #6ee7b7; } .v.count { color: #bae6fd; }
+  .sep { height: 1px; background: linear-gradient(90deg, transparent, rgba(148,163,184,0.25), transparent); margin: 16px 0 12px; }
+  .legend { display: flex; flex-direction: column; gap: 7px; }
+  .legend .row { display: flex; align-items: center; font-size: 11px; color: #94a3b8; }
+  .legend .sw { width: 9px; height: 9px; border-radius: 50%; margin-right: 9px; box-shadow: 0 0 9px currentColor; }
+  .hint { margin-top: 14px; font-size: 10px; color: #475569; letter-spacing: 0.2px; }
 </style>
 
-<div class="panel-covid">
-  <h5>COVID-19 en el mundo</h5>
-  <div id="totales" style="font-size: 12px; color: #94a3b8;">Cargando datos…</div>
-  <div class="legend">
-    <div><span class="dot" style="color:#38bdf8;background:#38bdf8"></span> &lt; 100 mil casos</div>
-    <div><span class="dot" style="color:#818cf8;background:#818cf8"></span> &lt; 500 mil</div>
-    <div><span class="dot" style="color:#c084fc;background:#c084fc"></span> &lt; 2 millones</div>
-    <div><span class="dot" style="color:#f472b6;background:#f472b6"></span> &lt; 10 millones</div>
-    <div><span class="dot" style="color:#fb7185;background:#fb7185"></span> &gt; 10 millones</div>
+<div class="panel">
+  <p class="eyebrow">Panorama global</p>
+  <h2 class="title">COVID-19 en el mundo</h2>
+  <div id="totales">
+    <div class="grid">
+      <div class="metric"><div class="k">Países</div><div class="v count" id="m-count">—</div></div>
+      <div class="metric"><div class="k">Confirmados</div><div class="v cases" id="m-cases">—</div></div>
+      <div class="metric"><div class="k">Muertos</div><div class="v deaths" id="m-deaths">—</div></div>
+      <div class="metric"><div class="k">Recuperados</div><div class="v rec" id="m-rec">—</div></div>
+    </div>
   </div>
-  <div class="hint">Arrastra para girar · rueda para zoom · clic en un punto</div>
+  <div class="sep"></div>
+  <div class="legend">
+    <div class="row"><span class="sw" style="color:#38bdf8;background:#38bdf8"></span> &lt; 100 mil casos</div>
+    <div class="row"><span class="sw" style="color:#818cf8;background:#818cf8"></span> &lt; 500 mil</div>
+    <div class="row"><span class="sw" style="color:#c084fc;background:#c084fc"></span> &lt; 2 millones</div>
+    <div class="row"><span class="sw" style="color:#f472b6;background:#f472b6"></span> &lt; 10 millones</div>
+    <div class="row"><span class="sw" style="color:#fb7185;background:#fb7185"></span> &gt; 10 millones</div>
+  </div>
+  <div class="hint">Arrastra para girar · rueda para zoom · pasa el cursor sobre una barra</div>
 </div>
 
 <div id="globe"></div>
@@ -40,7 +70,7 @@
     if (c >= 100000) return '#818cf8';
     return '#38bdf8';
   }
-  function altura(c) { return Math.min(0.42, 0.05 + Math.log10(c + 1) / 28); }
+  function alturaBarra(c) { return Math.min(0.6, 0.1 + 0.9 * (Math.log10(c + 1) - 3) / 5); }
 
   const world = Globe()(document.getElementById('globe'))
     .backgroundColor('#060912')
@@ -49,15 +79,16 @@
     .showAtmosphere(true)
     .atmosphereColor('#5b8cff')
     .atmosphereAltitude(0.18)
-    .pointLat('lat').pointLng('lng')
-    .pointColor('color').pointAltitude('alt').pointRadius(0.32)
-    .pointLabel(function (d) {
-      return '<div style="font-family:system-ui;background:#0f172a;color:#e2e8f0;' +
-        'padding:8px 10px;border-radius:10px;border:1px solid rgba(148,163,184,.25);min-width:190px">' +
-        '<strong>' + d.country + '</strong><br>' +
-        '<span style="color:#f87171">Confirmados: ' + d.cases.toLocaleString('es') + '</span><br>' +
-        '<span style="color:#94a3b8">Muertos: ' + d.deaths.toLocaleString('es') + '</span><br>' +
-        '<span style="color:#34d399">Recuperados: ' + d.recovered.toLocaleString('es') + '</span><br>' +
+    .barLat('lat').barLng('lng')
+    .barAltitude('alt').barRadius(0.55)
+    .barColor('color')
+    .barLabel(function (d) {
+      return '<div style="font-family:Inter,system-ui;background:#0b1220;color:#e2e8f0;' +
+        'padding:9px 11px;border-radius:11px;border:1px solid rgba(148,163,184,.25);min-width:196px">' +
+        '<strong style="font-size:13px">' + d.country + '</strong><br>' +
+        '<span style="color:#fda4af">Confirmados: ' + d.cases.toLocaleString('es') + '</span><br>' +
+        '<span style="color:#cbd5e1">Muertos: ' + d.deaths.toLocaleString('es') + '</span><br>' +
+        '<span style="color:#6ee7b7">Recuperados: ' + d.recovered.toLocaleString('es') + '</span><br>' +
         '<span style="color:#7dd3fc">Hoy: +' + d.todayCases.toLocaleString('es') + '</span>' +
         '</div>';
     });
@@ -75,8 +106,7 @@
     try {
       const res = await fetch('https://disease.sh/v3/covid-19/countries?sort=cases');
       const datos = await res.json();
-      const puntos = [];
-      const anillos = [];
+      const barras = [], anillos = [], etiquetas = [];
       let tc = 0, td = 0, tr = 0, n = 0;
       datos.forEach(function (d) {
         const lat = d.countryInfo.lat, lng = d.countryInfo.long;
@@ -85,22 +115,23 @@
         const p = {
           lat: lat, lng: lng, country: d.country,
           cases: d.cases, deaths: d.deaths, recovered: d.recovered, todayCases: d.todayCases,
-          color: colorPorCasos(d.cases), alt: altura(d.cases)
+          color: colorPorCasos(d.cases), alt: alturaBarra(d.cases)
         };
-        puntos.push(p);
-        if (n <= 15) {
-          anillos.push({ lat: lat, lng: lng, color: colorPorCasos(d.cases) });
-        }
+        barras.push(p);
+        if (n <= 15) anillos.push({ lat: lat, lng: lng, color: colorPorCasos(d.cases) });
+        if (n <= 12) etiquetas.push({ lat: lat, lng: lng, country: d.country, color: colorPorCasos(d.cases) });
       });
-      world.pointsData(puntos).ringsData(anillos)
-        .ringColor('color').ringMaxRadius(4).ringPropagationSpeed(2).ringRepeatPeriod(900);
-      document.getElementById('totales').innerHTML =
-        '<div class="stat"><span>Países</span><b>' + n + '</b></div>' +
-        '<div class="stat"><span>Confirmados</span><b style="color:#f87171">' + tc.toLocaleString('es') + '</b></div>' +
-        '<div class="stat"><span>Muertos</span><b style="color:#94a3b8">' + td.toLocaleString('es') + '</b></div>' +
-        '<div class="stat"><span>Recuperados</span><b style="color:#34d399">' + tr.toLocaleString('es') + '</b></div>';
+      world.barsData(barras).ringsData(anillos)
+        .ringColor('color').ringMaxRadius(4).ringPropagationSpeed(2).ringRepeatPeriod(900)
+        .labelsData(etiquetas).labelLat('lat').labelLng('lng')
+        .labelText('country').labelSize(0.85).labelColor('color')
+        .labelDotRadius(0.3).labelResolution(2);
+      document.getElementById('m-count').textContent = n.toLocaleString('es');
+      document.getElementById('m-cases').textContent = tc.toLocaleString('es');
+      document.getElementById('m-deaths').textContent = td.toLocaleString('es');
+      document.getElementById('m-rec').textContent = tr.toLocaleString('es');
     } catch (e) {
-      document.getElementById('totales').textContent = 'No se pudieron cargar los datos.';
+      document.getElementById('m-count').textContent = 'Error al cargar';
     }
   }
   cargar();
