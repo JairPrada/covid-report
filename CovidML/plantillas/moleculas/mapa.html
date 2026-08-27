@@ -20,9 +20,8 @@
 <script>
   const map = L.map('map', { worldCopyJump: true, scrollWheelZoom: true }).setView([10, -30], 2.2);
 
-  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
-    attribution: '&copy; OpenStreetMap &copy; CARTO',
-    subdomains: 'abcd',
+  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors',
     maxZoom: 19
   }).addTo(map);
 
@@ -80,7 +79,7 @@
   }
 
   datos.forEach(function (d) {
-    const radio = Math.max(6, Math.sqrt(d.confirmed) / 35);
+    const radio = Math.min(16, Math.max(5, (Math.log10(d.confirmed) - 4) * 3));
     const marker = L.circleMarker([d.lat, d.lng], {
       radius: radio,
       fillColor: colorPorCasos(d.confirmed),
