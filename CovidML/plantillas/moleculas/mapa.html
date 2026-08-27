@@ -1,369 +1,103 @@
 {% load static %}
-<div id="map" class="map" style="height: 100vh"></div>
-<script
-  src="https://maps.googleapis.com/maps/api/js?key=AIzaSyBw13wArgMIOq_a7epqq9V0p-PUccY0DsE&callback=initMap&libraries=&v=weekly"
-  defer></script>
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+  integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
+<div id="map" style="height: 100vh; width: 100%;"></div>
+<div class="container-fluid bg-dark text-white py-2" style="position:absolute; top:56px; left:0; right:0; z-index:1000;">
+  <div class="row align-items-center">
+    <div class="col">
+      <h5 class="mb-0">Probabilidad de contagio en el mundo</h5>
+    </div>
+    <div class="col-auto">
+      <span class="badge badge-danger">Muertos</span>
+      <span class="badge badge-success">Confirmados</span>
+      <span class="badge badge-warning">Recuperados</span>
+    </div>
+  </div>
+  <small class="text-muted">Datos de ejemplo con fines demostrativos</small>
+</div>
+<script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+  integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
-  const mapa = document.getElementById("map");
-  async function initMap() {
-    //Creando Mapa
-    const mapaGoogle = new google.maps.Map(mapa, {
-      center: { lat: 0, lng: 0 },
-      zoom: 2.8,
-      styles: [
-        {
-          "featureType": "administrative",
-          "elementType": "all",
-          "stylers": [
-            {
-              "visibility": "on"
-            }
-          ]
-        },
-        {
-          "featureType": "administrative",
-          "elementType": "labels.text.fill",
-          "stylers": [
-            {
-              "color": "#444444"
-            }
-          ]
-        },
-        {
-          "featureType": "administrative.country",
-          "elementType": "labels.text",
-          "stylers": [
-            {
-              "visibility": "on"
-            }
-          ]
-        },
-        {
-          "featureType": "landscape",
-          "elementType": "all",
-          "stylers": [
-            {
-              "color": "#f2f2f2"
-            }
-          ]
-        },
-        {
-          "featureType": "landscape",
-          "elementType": "geometry.fill",
-          "stylers": [
-            {
-              "color": "#403b4c"
-            }
-          ]
-        },
-        {
-          "featureType": "poi",
-          "elementType": "all",
-          "stylers": [
-            {
-              "visibility": "off"
-            }
-          ]
-        },
-        {
-          "featureType": "poi.attraction",
-          "elementType": "all",
-          "stylers": [
-            {
-              "visibility": "on"
-            }
-          ]
-        },
-        {
-          "featureType": "poi.business",
-          "elementType": "all",
-          "stylers": [
-            {
-              "visibility": "off"
-            }
-          ]
-        },
-        {
-          "featureType": "poi.park",
-          "elementType": "all",
-          "stylers": [
-            {
-              "visibility": "on"
-            }
-          ]
-        },
-        {
-          "featureType": "poi.park",
-          "elementType": "labels.text",
-          "stylers": [
-            {
-              "visibility": "off"
-            }
-          ]
-        },
-        {
-          "featureType": "poi.school",
-          "elementType": "all",
-          "stylers": [
-            {
-              "visibility": "off"
-            }
-          ]
-        },
-        {
-          "featureType": "poi.sports_complex",
-          "elementType": "all",
-          "stylers": [
-            {
-              "visibility": "off"
-            }
-          ]
-        },
-        {
-          "featureType": "road",
-          "elementType": "all",
-          "stylers": [
-            {
-              "saturation": -100
-            },
-            {
-              "lightness": 45
-            },
-            {
-              "visibility": "on"
-            }
-          ]
-        },
-        {
-          "featureType": "road",
-          "elementType": "geometry.fill",
-          "stylers": [
-            {
-              "color": "#b87adb"
-            },
-            {
-              "visibility": "off"
-            }
-          ]
-        },
-        {
-          "featureType": "road",
-          "elementType": "geometry.stroke",
-          "stylers": [
-            {
-              "color": "#c8bae5"
-            }
-          ]
-        },
-        {
-          "featureType": "road.highway",
-          "elementType": "all",
-          "stylers": [
-            {
-              "visibility": "simplified"
-            }
-          ]
-        },
-        {
-          "featureType": "road.highway",
-          "elementType": "geometry.fill",
-          "stylers": [
-            {
-              "color": "#9591d3"
-            }
-          ]
-        },
-        {
-          "featureType": "road.highway",
-          "elementType": "geometry.stroke",
-          "stylers": [
-            {
-              "color": "#eaa7a7"
-            }
-          ]
-        },
-        {
-          "featureType": "road.highway",
-          "elementType": "labels",
-          "stylers": [
-            {
-              "visibility": "on"
-            }
-          ]
-        },
-        {
-          "featureType": "road.arterial",
-          "elementType": "all",
-          "stylers": [
-            {
-              "visibility": "simplified"
-            },
-            {
-              "color": "#a2a8fa"
-            }
-          ]
-        },
-        {
-          "featureType": "road.arterial",
-          "elementType": "geometry.fill",
-          "stylers": [
-            {
-              "color": "#d8d6e6"
-            }
-          ]
-        },
-        {
-          "featureType": "road.arterial",
-          "elementType": "labels.text.fill",
-          "stylers": [
-            {
-              "color": "#070505"
-            }
-          ]
-        },
-        {
-          "featureType": "road.arterial",
-          "elementType": "labels.text.stroke",
-          "stylers": [
-            {
-              "color": "#f3dfdf"
-            }
-          ]
-        },
-        {
-          "featureType": "road.arterial",
-          "elementType": "labels.icon",
-          "stylers": [
-            {
-              "visibility": "off"
-            }
-          ]
-        },
-        {
-          "featureType": "road.local",
-          "elementType": "all",
-          "stylers": [
-            {
-              "visibility": "on"
-            }
-          ]
-        },
-        {
-          "featureType": "road.local",
-          "elementType": "labels.text.fill",
-          "stylers": [
-            {
-              "color": "#121010"
-            }
-          ]
-        },
-        {
-          "featureType": "transit",
-          "elementType": "all",
-          "stylers": [
-            {
-              "visibility": "off"
-            }
-          ]
-        },
-        {
-          "featureType": "transit.station.airport",
-          "elementType": "all",
-          "stylers": [
-            {
-              "visibility": "off"
-            }
-          ]
-        },
-        {
-          "featureType": "transit.station.bus",
-          "elementType": "all",
-          "stylers": [
-            {
-              "visibility": "off"
-            }
-          ]
-        },
-        {
-          "featureType": "transit.station.rail",
-          "elementType": "all",
-          "stylers": [
-            {
-              "visibility": "off"
-            }
-          ]
-        },
-        {
-          "featureType": "water",
-          "elementType": "all",
-          "stylers": [
-            {
-              "color": "#7c9ab0"
-            },
-            {
-              "visibility": "on"
-            }
-          ]
-        },
-        {
-          "featureType": "water",
-          "elementType": "geometry.fill",
-          "stylers": [
-            {
-              "color": "#33585c"
-            }
-          ]
-        }
-      ]
-    });
+  const map = L.map('map', { worldCopyJump: true, scrollWheelZoom: true }).setView([10, -30], 2.2);
 
-    // Obteniendo datos
-    const respuesta = await fetch(
-      "https://wuhan-coronavirus-api.laeyoung.endpoint.ainize.ai/jhu-edu/latest"
-    );
-    const datos = await respuesta.json();
-    //Creando popup
-    const info = new google.maps.InfoWindow();
-    //Agregando Pins al mapa
-    datos.forEach((item) => {
+  L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png', {
+    attribution: '&copy; OpenStreetMap &copy; CARTO',
+    subdomains: 'abcd',
+    maxZoom: 19
+  }).addTo(map);
 
-      const marker = new google.maps.Marker({
-        position: { lat: item.location.lat, lng: item.location.lng },
-        map: mapaGoogle,
-        icon:"../../static/medios/imagenes/icon.png"
+  const datos = [
+    { country: "Colombia", lat: 4.57, lng: -74.29, confirmed: 1480000, deaths: 36500, recovered: 1410000 },
+    { country: "Brasil", lat: -14.23, lng: -51.92, confirmed: 21000000, deaths: 587000, recovered: 19900000 },
+    { country: "Estados Unidos", lat: 37.09, lng: -95.71, confirmed: 45000000, deaths: 790000, recovered: 42000000 },
+    { country: "Mexico", lat: 23.63, lng: -102.55, confirmed: 3900000, deaths: 295000, recovered: 3300000 },
+    { country: "Espana", lat: 40.46, lng: -3.74, confirmed: 5000000, deaths: 87000, recovered: 4500000 },
+    { country: "Italia", lat: 41.87, lng: 12.56, confirmed: 4800000, deaths: 132000, recovered: 4400000 },
+    { country: "Francia", lat: 46.23, lng: 2.21, confirmed: 7000000, deaths: 115000, recovered: 6500000 },
+    { country: "Alemania", lat: 51.16, lng: 10.45, confirmed: 6300000, deaths: 108000, recovered: 5800000 },
+    { country: "Reino Unido", lat: 55.37, lng: -3.43, confirmed: 11000000, deaths: 156000, recovered: 10500000 },
+    { country: "China", lat: 35.86, lng: 104.19, confirmed: 220000, deaths: 5200, recovered: 210000 },
+    { country: "India", lat: 20.59, lng: 78.96, confirmed: 43000000, deaths: 521000, recovered: 42000000 },
+    { country: "Rusia", lat: 61.52, lng: 105.31, confirmed: 18000000, deaths: 370000, recovered: 17000000 },
+    { country: "Peru", lat: -9.19, lng: -75.01, confirmed: 3600000, deaths: 213000, recovered: 3300000 },
+    { country: "Argentina", lat: -38.41, lng: -63.61, confirmed: 5300000, deaths: 116000, recovered: 5000000 },
+    { country: "Chile", lat: -35.67, lng: -71.54, confirmed: 3600000, deaths: 58000, recovered: 3400000 },
+    { country: "Ecuador", lat: -1.83, lng: -78.18, confirmed: 910000, deaths: 35800, recovered: 850000 },
+    { country: "Sudafrica", lat: -30.55, lng: 22.93, confirmed: 3700000, deaths: 100000, recovered: 3500000 },
+    { country: "Nigeria", lat: 9.08, lng: 8.67, confirmed: 260000, deaths: 3100, recovered: 250000 },
+    { country: "Egipto", lat: 26.82, lng: 30.80, confirmed: 450000, deaths: 24000, recovered: 420000 },
+    { country: "Turquia", lat: 38.96, lng: 35.24, confirmed: 8500000, deaths: 78000, recovered: 8200000 },
+    { country: "Iran", lat: 32.42, lng: 53.69, confirmed: 7200000, deaths: 141000, recovered: 6900000 },
+    { country: "Japon", lat: 36.20, lng: 138.25, confirmed: 2200000, deaths: 17000, recovered: 2100000 },
+    { country: "Corea del Sur", lat: 35.90, lng: 127.76, confirmed: 2700000, deaths: 30000, recovered: 2600000 },
+    { country: "Indonesia", lat: -0.79, lng: 113.92, confirmed: 6000000, deaths: 156000, recovered: 5700000 },
+    { country: "Australia", lat: -25.27, lng: 133.77, confirmed: 9000000, deaths: 12500, recovered: 8800000 },
+    { country: "Canada", lat: 56.13, lng: -106.34, confirmed: 4000000, deaths: 43000, recovered: 3800000 },
+    { country: "Suecia", lat: 60.12, lng: 18.64, confirmed: 2500000, deaths: 19000, recovered: 2400000 },
+    { country: "Paises Bajos", lat: 52.13, lng: 5.29, confirmed: 3300000, deaths: 22000, recovered: 3200000 },
+    { country: "Belgica", lat: 50.50, lng: 4.47, confirmed: 2900000, deaths: 31000, recovered: 2800000 },
+    { country: "Suiza", lat: 46.81, lng: 8.22, confirmed: 1700000, deaths: 13000, recovered: 1600000 },
+    { country: "Portugal", lat: 39.39, lng: -8.24, confirmed: 2700000, deaths: 22000, recovered: 2600000 },
+    { country: "Polonia", lat: 51.92, lng: 19.14, confirmed: 6100000, deaths: 117000, recovered: 5700000 },
+    { country: "Ucrania", lat: 48.37, lng: 31.16, confirmed: 5300000, deaths: 110000, recovered: 5000000 },
+    { country: "Arabia Saudita", lat: 23.88, lng: 45.08, confirmed: 800000, deaths: 9200, recovered: 770000 },
+    { country: "Filipinas", lat: 12.87, lng: 121.77, confirmed: 3900000, deaths: 62000, recovered: 3700000 },
+    { country: "Vietnam", lat: 14.05, lng: 108.27, confirmed: 11000000, deaths: 43000, recovered: 10000000 },
+    { country: "Tailandia", lat: 15.87, lng: 100.99, confirmed: 4700000, deaths: 33000, recovered: 4500000 },
+    { country: "Pakistan", lat: 30.37, lng: 69.34, confirmed: 1500000, deaths: 30500, recovered: 1400000 },
+    { country: "Bangladesh", lat: 23.68, lng: 90.35, confirmed: 2000000, deaths: 29500, recovered: 1900000 },
+    { country: "Kenia", lat: -0.02, lng: 37.90, confirmed: 340000, deaths: 5700, recovered: 320000 },
+    { country: "Marruecos", lat: 31.79, lng: -7.09, confirmed: 1200000, deaths: 16000, recovered: 1150000 }
+  ];
 
-      });
-
-      //activando evento para no saturar el mapa
-      marker.addListener("click", () => {
-        info.setContent(detalles(item));
-        info.open(mapaGoogle, marker);
-      });
-    });
-  }
-  function detalles({
-    confirmed,
-    deaths,
-    recovered,
-    provincestate,
-    countryregion,
-    lastupdate,
-  }) {
-    return `
-    <div class="container ">
-        <div class="row justify-content-center ">
-            <p class="h3 text-center col-12"> <strong> ${countryregion} - ${provincestate} </strong> </p>
-            <div class="col-10" >
-                <p style="font-size: 20px;">Casos en los tres tipos de estado muertos confirados y recuperados este reporte en su ultima actualizacion se realizo ${lastupdate} :</p>
-            </div>
-            <p class="btn btn-danger"><strong>Muertos:  </strong>${deaths} personas</p>
-            <br>
-            <p class=" btn btn-success"><strong>Confirmados:  </strong>${confirmed} personas</p>
-            <br>
-            <p class="btn btn-warning"'><strong>Recuperados:  </strong>${recovered} personas</p>
-        </div>
-      </div>
-    `;
+  function colorPorCasos(c) {
+    if (c > 20000000) return "#7b1fa2";
+    if (c > 10000000) return "#9c27b0";
+    if (c > 5000000) return "#c2185b";
+    if (c > 1000000) return "#e91e63";
+    if (c > 500000) return "#ff5252";
+    return "#ff8a80";
   }
 
+  datos.forEach(function (d) {
+    const radio = Math.max(6, Math.sqrt(d.confirmed) / 35);
+    const marker = L.circleMarker([d.lat, d.lng], {
+      radius: radio,
+      fillColor: colorPorCasos(d.confirmed),
+      color: "#ffffff",
+      weight: 1,
+      fillOpacity: 0.75
+    }).addTo(map);
+
+    const popup =
+      '<div style="min-width:220px">' +
+      '<h5 class="mb-2">' + d.country + '</h5>' +
+      '<p class="mb-1"><span class="badge badge-danger">Muertos: ' + d.deaths.toLocaleString('es') + '</span></p>' +
+      '<p class="mb-1"><span class="badge badge-success">Confirmados: ' + d.confirmed.toLocaleString('es') + '</span></p>' +
+      '<p class="mb-1"><span class="badge badge-warning">Recuperados: ' + d.recovered.toLocaleString('es') + '</span></p>' +
+      '<p class="text-muted" style="font-size:11px">Datos de ejemplo</p>' +
+      '</div>';
+
+    marker.bindPopup(popup);
+  });
 </script>
