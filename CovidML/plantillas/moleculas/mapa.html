@@ -2,39 +2,27 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 <style>
-  html, body { margin: 0; padding: 0; background: #060912; font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  html, body { margin: 0; padding: 0; background: #0b1220; font-family: 'Inter', system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
   .navbar { position: relative; z-index: 1100; }
   #globe { position: fixed; top: 0; left: 0; height: 100vh; width: 100%; z-index: 1; }
 
   .panel {
     position: fixed; top: 64px; left: 16px; z-index: 1000; width: 296px;
-    padding: 20px 20px 16px; border-radius: 20px;
-    background: rgba(2, 6, 23, 0.55); border: 1px solid rgba(148, 163, 184, 0.14);
-    backdrop-filter: blur(14px) saturate(140%);
-    box-shadow: 0 18px 50px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.06);
-    color: #e2e8f0;
+    padding: 18px 20px 16px; border-radius: 16px;
+    background: rgba(2, 6, 23, 0.78); border: 1px solid rgba(148, 163, 184, 0.18);
+    backdrop-filter: blur(12px); color: #e2e8f0;
   }
-  .panel::before {
-    content: ""; position: absolute; inset: 0; border-radius: 20px; padding: 1px;
-    background: linear-gradient(135deg, rgba(56,189,248,0.35), rgba(192,132,252,0.25), rgba(251,113,133,0.30));
-    -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
-    -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
-  }
-  .eyebrow { font-size: 10px; letter-spacing: 2.4px; text-transform: uppercase; color: #64748b; margin: 0 0 4px; }
-  .title {
-    margin: 0 0 16px; font-size: 22px; font-weight: 700; line-height: 1.1; letter-spacing: -0.3px;
-    background: linear-gradient(92deg, #7dd3fc, #c4b5fd 60%, #fda4af);
-    -webkit-background-clip: text; background-clip: text; color: transparent;
-  }
+  .eyebrow { font-size: 10px; letter-spacing: 2.4px; text-transform: uppercase; color: #64748b; margin: 0 0 6px; }
+  .title { margin: 0 0 14px; font-size: 20px; font-weight: 700; color: #f1f5f9; }
   .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px 12px; }
   .metric .k { font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: #64748b; }
   .metric .v { font-size: 18px; font-weight: 600; font-variant-numeric: tabular-nums; margin-top: 2px; }
   .v.cases { color: #fda4af; } .v.deaths { color: #cbd5e1; } .v.rec { color: #6ee7b7; } .v.count { color: #bae6fd; }
-  .sep { height: 1px; background: linear-gradient(90deg, transparent, rgba(148,163,184,0.25), transparent); margin: 16px 0 12px; }
+  .sep { height: 1px; background: rgba(148, 163, 184, 0.2); margin: 14px 0 12px; }
   .legend { display: flex; flex-direction: column; gap: 7px; }
   .legend .row { display: flex; align-items: center; font-size: 11px; color: #94a3b8; }
-  .legend .sw { width: 9px; height: 9px; border-radius: 50%; margin-right: 9px; box-shadow: 0 0 9px currentColor; }
-  .hint { margin-top: 14px; font-size: 10px; color: #475569; letter-spacing: 0.2px; }
+  .legend .sw { width: 9px; height: 9px; border-radius: 50%; margin-right: 9px; }
+  .hint { margin-top: 14px; font-size: 10px; color: #64748b; }
 </style>
 
 <div class="panel">
@@ -50,13 +38,13 @@
   </div>
   <div class="sep"></div>
   <div class="legend">
-    <div class="row"><span class="sw" style="color:#38bdf8;background:#38bdf8"></span> &lt; 100 mil casos</div>
-    <div class="row"><span class="sw" style="color:#818cf8;background:#818cf8"></span> &lt; 500 mil</div>
-    <div class="row"><span class="sw" style="color:#c084fc;background:#c084fc"></span> &lt; 2 millones</div>
-    <div class="row"><span class="sw" style="color:#f472b6;background:#f472b6"></span> &lt; 10 millones</div>
-    <div class="row"><span class="sw" style="color:#fb7185;background:#fb7185"></span> &gt; 10 millones</div>
+    <div class="row"><span class="sw" style="background:#38bdf8"></span> &lt; 100 mil casos</div>
+    <div class="row"><span class="sw" style="background:#818cf8"></span> &lt; 500 mil</div>
+    <div class="row"><span class="sw" style="background:#c084fc"></span> &lt; 2 millones</div>
+    <div class="row"><span class="sw" style="background:#f472b6"></span> &lt; 10 millones</div>
+    <div class="row"><span class="sw" style="background:#fb7185"></span> &gt; 10 millones</div>
   </div>
-  <div class="hint">Arrastra para girar · rueda para zoom · pasa el cursor sobre una barra</div>
+  <div class="hint">Arrastra para girar · rueda para zoom · cursor sobre una barra</div>
 </div>
 
 <div id="globe"></div>
@@ -70,37 +58,39 @@
     if (c >= 100000) return '#818cf8';
     return '#38bdf8';
   }
-  function alturaBarra(c) { return Math.min(0.6, 0.1 + 0.9 * (Math.log10(c + 1) - 3) / 5); }
+  function alturaBarra(c) { return Math.min(0.6, 0.15 + 0.85 * (Math.log10(c + 1) - 3) / 5); }
 
-  const world = Globe()(document.getElementById('globe'))
-    .backgroundColor('#060912')
-    .globeImageUrl('//unpkg.com/three-globe/example/img/earth-dark.jpg')
-    .bumpImageUrl('//unpkg.com/three-globe/example/img/earth-topology.png')
-    .showAtmosphere(true)
-    .atmosphereColor('#5b8cff')
-    .atmosphereAltitude(0.18)
-    .barLat('lat').barLng('lng')
-    .barAltitude('alt').barRadius(0.55)
-    .barColor('color')
-    .barLabel(function (d) {
-      return '<div style="font-family:Inter,system-ui;background:#0b1220;color:#e2e8f0;' +
-        'padding:9px 11px;border-radius:11px;border:1px solid rgba(148,163,184,.25);min-width:196px">' +
-        '<strong style="font-size:13px">' + d.country + '</strong><br>' +
-        '<span style="color:#fda4af">Confirmados: ' + d.cases.toLocaleString('es') + '</span><br>' +
-        '<span style="color:#cbd5e1">Muertos: ' + d.deaths.toLocaleString('es') + '</span><br>' +
-        '<span style="color:#6ee7b7">Recuperados: ' + d.recovered.toLocaleString('es') + '</span><br>' +
-        '<span style="color:#7dd3fc">Hoy: +' + d.todayCases.toLocaleString('es') + '</span>' +
-        '</div>';
-    });
-
-  world.width(window.innerWidth).height(window.innerHeight);
-  world.controls().autoRotate = true;
-  world.controls().autoRotateSpeed = 0.55;
-  world.controls().enableZoom = true;
-  world.pointOfView({ lat: 12, lng: -20, altitude: 2.4 }, 0);
-  window.addEventListener('resize', function () {
+  var world = null;
+  if (typeof Globe !== 'undefined') {
+    world = Globe()(document.getElementById('globe'))
+      .backgroundColor('#0b1220')
+      .globeImageUrl('//unpkg.com/three-globe/example/img/earth-blue-marble.jpg')
+      .showAtmosphere(true)
+      .atmosphereColor('#7dd3fc')
+      .atmosphereAltitude(0.15)
+      .barLat('lat').barLng('lng')
+      .barAltitude('alt').barRadius(0.7)
+      .barColor('color')
+      .barLabel(function (d) {
+        return '<div style="font-family:Inter,system-ui;background:#0b1220;color:#e2e8f0;' +
+          'padding:9px 11px;border-radius:11px;border:1px solid rgba(148,163,184,.3);min-width:196px">' +
+          '<strong style="font-size:13px">' + d.country + '</strong><br>' +
+          '<span style="color:#fda4af">Confirmados: ' + d.cases.toLocaleString('es') + '</span><br>' +
+          '<span style="color:#cbd5e1">Muertos: ' + d.deaths.toLocaleString('es') + '</span><br>' +
+          '<span style="color:#6ee7b7">Recuperados: ' + d.recovered.toLocaleString('es') + '</span><br>' +
+          '<span style="color:#7dd3fc">Hoy: +' + d.todayCases.toLocaleString('es') + '</span>' +
+          '</div>';
+      });
     world.width(window.innerWidth).height(window.innerHeight);
-  });
+    world.controls().autoRotate = true;
+    world.controls().autoRotateSpeed = 0.55;
+    world.controls().enableZoom = true;
+    world.pointOfView({ lat: 12, lng: -20, altitude: 2.4 }, 0);
+    window.addEventListener('resize', function () { world.width(window.innerWidth).height(window.innerHeight); });
+  } else {
+    document.getElementById('globe').innerHTML =
+      '<div style="color:#94a3b8;font-family:Inter;padding:40px">No se pudo cargar el globo (CDN).</div>';
+  }
 
   async function cargar() {
     try {
@@ -121,15 +111,22 @@
         if (n <= 15) anillos.push({ lat: lat, lng: lng, color: colorPorCasos(d.cases) });
         if (n <= 12) etiquetas.push({ lat: lat, lng: lng, country: d.country, color: colorPorCasos(d.cases) });
       });
-      world.barsData(barras).ringsData(anillos)
-        .ringColor('color').ringMaxRadius(4).ringPropagationSpeed(2).ringRepeatPeriod(900)
-        .labelsData(etiquetas).labelLat('lat').labelLng('lng')
-        .labelText('country').labelSize(0.85).labelColor('color')
-        .labelDotRadius(0.3).labelResolution(2);
+
       document.getElementById('m-count').textContent = n.toLocaleString('es');
       document.getElementById('m-cases').textContent = tc.toLocaleString('es');
       document.getElementById('m-deaths').textContent = td.toLocaleString('es');
       document.getElementById('m-rec').textContent = tr.toLocaleString('es');
+
+      if (world) {
+        try {
+          world.barsData(barras);
+          world.ringsData(anillos).ringColor('color').ringMaxRadius(4).ringPropagationSpeed(2).ringRepeatPeriod(900);
+        } catch (e) { console.error('barras/anillos', e); }
+        try {
+          world.labelsData(etiquetas).labelLat('lat').labelLng('lng')
+            .labelText('country').labelSize(0.9).labelColor('color').labelDotRadius(0.3);
+        } catch (e) { console.error('etiquetas', e); }
+      }
     } catch (e) {
       document.getElementById('m-count').textContent = 'Error al cargar';
     }
