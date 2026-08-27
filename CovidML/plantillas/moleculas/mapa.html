@@ -1,102 +1,94 @@
-{% load static %}
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
   integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY=" crossorigin="" />
-<div id="map" style="height: 100vh; width: 100%;"></div>
-<div class="container-fluid bg-dark text-white py-2" style="position:absolute; top:56px; left:0; right:0; z-index:1000;">
-  <div class="row align-items-center">
-    <div class="col">
-      <h5 class="mb-0">Probabilidad de contagio en el mundo</h5>
-    </div>
-    <div class="col-auto">
-      <span class="badge badge-danger">Muertos</span>
-      <span class="badge badge-success">Confirmados</span>
-      <span class="badge badge-warning">Recuperados</span>
-    </div>
+<style>
+  #map { height: 100vh; width: 100%; background: #0b1020; }
+  /* Mapa oscuro sin API key: invertimos los tiles de OpenStreetMap */
+  .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(0.95) contrast(0.9); }
+  .panel-covid {
+    position: fixed; top: 64px; left: 12px; z-index: 1000; width: 300px;
+    background: rgba(17, 24, 39, 0.82); backdrop-filter: blur(8px);
+    color: #e5e7eb; border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 14px; padding: 14px 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+  }
+  .panel-covid h5 { margin: 0 0 8px; font-weight: 700; letter-spacing: 0.3px; }
+  .stat { display: flex; justify-content: space-between; font-size: 13px; margin: 3px 0; }
+  .stat b { font-variant-numeric: tabular-nums; }
+  .legend { margin-top: 10px; font-size: 11px; line-height: 1.7; }
+  .dot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; margin-right: 6px; vertical-align: middle; }
+  .leaflet-popup-content-wrapper, .leaflet-popup-tip { background: #111827; color: #e5e7eb; }
+  .leaflet-popup-content { margin: 10px 12px; }
+  .badge2 { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11px; font-weight: 600; margin: 2px 0; }
+</style>
+
+<div class="panel-covid">
+  <h5>COVID-19 en el mundo</h5>
+  <div id="totales" class="text-muted" style="font-size: 12px;">Cargando datos…</div>
+  <div class="legend">
+    <div><span class="dot" style="background:#4caf50"></span> &lt; 100 mil casos</div>
+    <div><span class="dot" style="background:#ffeb3b"></span> &lt; 500 mil</div>
+    <div><span class="dot" style="background:#ff9800"></span> &lt; 2 millones</div>
+    <div><span class="dot" style="background:#f44336"></span> &lt; 10 millones</div>
+    <div><span class="dot" style="background:#9c27b0"></span> &gt; 10 millones</div>
   </div>
-  <small class="text-muted">Datos de ejemplo con fines demostrativos</small>
 </div>
+
+<div id="map"></div>
+
 <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
   integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo=" crossorigin=""></script>
 <script>
-  const map = L.map('map', { worldCopyJump: true, scrollWheelZoom: true }).setView([10, -30], 2.2);
-
+  const map = L.map('map', { worldCopyJump: true, scrollWheelZoom: true }).setView([20, -30], 2);
   L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
     attribution: '&copy; OpenStreetMap contributors',
     maxZoom: 19
   }).addTo(map);
 
-  const datos = [
-    { country: "Colombia", lat: 4.57, lng: -74.29, confirmed: 1480000, deaths: 36500, recovered: 1410000 },
-    { country: "Brasil", lat: -14.23, lng: -51.92, confirmed: 21000000, deaths: 587000, recovered: 19900000 },
-    { country: "Estados Unidos", lat: 37.09, lng: -95.71, confirmed: 45000000, deaths: 790000, recovered: 42000000 },
-    { country: "Mexico", lat: 23.63, lng: -102.55, confirmed: 3900000, deaths: 295000, recovered: 3300000 },
-    { country: "Espana", lat: 40.46, lng: -3.74, confirmed: 5000000, deaths: 87000, recovered: 4500000 },
-    { country: "Italia", lat: 41.87, lng: 12.56, confirmed: 4800000, deaths: 132000, recovered: 4400000 },
-    { country: "Francia", lat: 46.23, lng: 2.21, confirmed: 7000000, deaths: 115000, recovered: 6500000 },
-    { country: "Alemania", lat: 51.16, lng: 10.45, confirmed: 6300000, deaths: 108000, recovered: 5800000 },
-    { country: "Reino Unido", lat: 55.37, lng: -3.43, confirmed: 11000000, deaths: 156000, recovered: 10500000 },
-    { country: "China", lat: 35.86, lng: 104.19, confirmed: 220000, deaths: 5200, recovered: 210000 },
-    { country: "India", lat: 20.59, lng: 78.96, confirmed: 43000000, deaths: 521000, recovered: 42000000 },
-    { country: "Rusia", lat: 61.52, lng: 105.31, confirmed: 18000000, deaths: 370000, recovered: 17000000 },
-    { country: "Peru", lat: -9.19, lng: -75.01, confirmed: 3600000, deaths: 213000, recovered: 3300000 },
-    { country: "Argentina", lat: -38.41, lng: -63.61, confirmed: 5300000, deaths: 116000, recovered: 5000000 },
-    { country: "Chile", lat: -35.67, lng: -71.54, confirmed: 3600000, deaths: 58000, recovered: 3400000 },
-    { country: "Ecuador", lat: -1.83, lng: -78.18, confirmed: 910000, deaths: 35800, recovered: 850000 },
-    { country: "Sudafrica", lat: -30.55, lng: 22.93, confirmed: 3700000, deaths: 100000, recovered: 3500000 },
-    { country: "Nigeria", lat: 9.08, lng: 8.67, confirmed: 260000, deaths: 3100, recovered: 250000 },
-    { country: "Egipto", lat: 26.82, lng: 30.80, confirmed: 450000, deaths: 24000, recovered: 420000 },
-    { country: "Turquia", lat: 38.96, lng: 35.24, confirmed: 8500000, deaths: 78000, recovered: 8200000 },
-    { country: "Iran", lat: 32.42, lng: 53.69, confirmed: 7200000, deaths: 141000, recovered: 6900000 },
-    { country: "Japon", lat: 36.20, lng: 138.25, confirmed: 2200000, deaths: 17000, recovered: 2100000 },
-    { country: "Corea del Sur", lat: 35.90, lng: 127.76, confirmed: 2700000, deaths: 30000, recovered: 2600000 },
-    { country: "Indonesia", lat: -0.79, lng: 113.92, confirmed: 6000000, deaths: 156000, recovered: 5700000 },
-    { country: "Australia", lat: -25.27, lng: 133.77, confirmed: 9000000, deaths: 12500, recovered: 8800000 },
-    { country: "Canada", lat: 56.13, lng: -106.34, confirmed: 4000000, deaths: 43000, recovered: 3800000 },
-    { country: "Suecia", lat: 60.12, lng: 18.64, confirmed: 2500000, deaths: 19000, recovered: 2400000 },
-    { country: "Paises Bajos", lat: 52.13, lng: 5.29, confirmed: 3300000, deaths: 22000, recovered: 3200000 },
-    { country: "Belgica", lat: 50.50, lng: 4.47, confirmed: 2900000, deaths: 31000, recovered: 2800000 },
-    { country: "Suiza", lat: 46.81, lng: 8.22, confirmed: 1700000, deaths: 13000, recovered: 1600000 },
-    { country: "Portugal", lat: 39.39, lng: -8.24, confirmed: 2700000, deaths: 22000, recovered: 2600000 },
-    { country: "Polonia", lat: 51.92, lng: 19.14, confirmed: 6100000, deaths: 117000, recovered: 5700000 },
-    { country: "Ucrania", lat: 48.37, lng: 31.16, confirmed: 5300000, deaths: 110000, recovered: 5000000 },
-    { country: "Arabia Saudita", lat: 23.88, lng: 45.08, confirmed: 800000, deaths: 9200, recovered: 770000 },
-    { country: "Filipinas", lat: 12.87, lng: 121.77, confirmed: 3900000, deaths: 62000, recovered: 3700000 },
-    { country: "Vietnam", lat: 14.05, lng: 108.27, confirmed: 11000000, deaths: 43000, recovered: 10000000 },
-    { country: "Tailandia", lat: 15.87, lng: 100.99, confirmed: 4700000, deaths: 33000, recovered: 4500000 },
-    { country: "Pakistan", lat: 30.37, lng: 69.34, confirmed: 1500000, deaths: 30500, recovered: 1400000 },
-    { country: "Bangladesh", lat: 23.68, lng: 90.35, confirmed: 2000000, deaths: 29500, recovered: 1900000 },
-    { country: "Kenia", lat: -0.02, lng: 37.90, confirmed: 340000, deaths: 5700, recovered: 320000 },
-    { country: "Marruecos", lat: 31.79, lng: -7.09, confirmed: 1200000, deaths: 16000, recovered: 1150000 }
-  ];
-
   function colorPorCasos(c) {
-    if (c > 20000000) return "#7b1fa2";
-    if (c > 10000000) return "#9c27b0";
-    if (c > 5000000) return "#c2185b";
-    if (c > 1000000) return "#e91e63";
-    if (c > 500000) return "#ff5252";
-    return "#ff8a80";
+    if (c >= 10000000) return '#9c27b0';
+    if (c >= 1000000) return '#f44336';
+    if (c >= 200000) return '#ff9800';
+    if (c >= 100000) return '#ffeb3b';
+    return '#4caf50';
+  }
+  function radioPorCasos(c) {
+    return Math.min(14, Math.max(5, (Math.log10(c + 1) - 3) * 2.6));
   }
 
-  datos.forEach(function (d) {
-    const radio = Math.min(16, Math.max(5, (Math.log10(d.confirmed) - 4) * 3));
-    const marker = L.circleMarker([d.lat, d.lng], {
-      radius: radio,
-      fillColor: colorPorCasos(d.confirmed),
-      color: "#ffffff",
-      weight: 1,
-      fillOpacity: 0.75
-    }).addTo(map);
-
-    const popup =
-      '<div style="min-width:220px">' +
-      '<h5 class="mb-2">' + d.country + '</h5>' +
-      '<p class="mb-1"><span class="badge badge-danger">Muertos: ' + d.deaths.toLocaleString('es') + '</span></p>' +
-      '<p class="mb-1"><span class="badge badge-success">Confirmados: ' + d.confirmed.toLocaleString('es') + '</span></p>' +
-      '<p class="mb-1"><span class="badge badge-warning">Recuperados: ' + d.recovered.toLocaleString('es') + '</span></p>' +
-      '<p class="text-muted" style="font-size:11px">Datos de ejemplo</p>' +
-      '</div>';
-
-    marker.bindPopup(popup);
-  });
+  async function cargar() {
+    try {
+      const res = await fetch('https://disease.sh/v3/covid-19/countries?sort=cases');
+      const datos = await res.json();
+      let tc = 0, td = 0, tr = 0, n = 0;
+      datos.forEach(function (d) {
+        const lat = d.countryInfo.lat;
+        const lng = d.countryInfo.long;
+        if (!lat && !lng) return;
+        tc += d.cases; td += d.deaths; tr += d.recovered; n++;
+        const marker = L.circleMarker([lat, lng], {
+          radius: radioPorCasos(d.cases),
+          fillColor: colorPorCasos(d.cases),
+          color: '#0b1020',
+          weight: 1,
+          fillOpacity: 0.8
+        }).addTo(map);
+        marker.bindPopup(
+          '<div style="min-width:210px">' +
+          '<h6 class="mb-1">' + d.country + '</h6>' +
+          '<span class="badge2" style="background:#f44336;color:#fff">Confirmados: ' + d.cases.toLocaleString('es') + '</span><br>' +
+          '<span class="badge2" style="background:#6b7280;color:#fff">Muertos: ' + d.deaths.toLocaleString('es') + '</span><br>' +
+          '<span class="badge2" style="background:#4caf50;color:#062">Recuperados: ' + d.recovered.toLocaleString('es') + '</span><br>' +
+          '<span class="badge2" style="background:#1e88e5;color:#fff">Hoy: +' + d.todayCases.toLocaleString('es') + '</span>' +
+          '</div>'
+        );
+      });
+      document.getElementById('totales').innerHTML =
+        '<div class="stat"><span>Países</span><b>' + n + '</b></div>' +
+        '<div class="stat"><span>Confirmados</span><b style="color:#f87171">' + tc.toLocaleString('es') + '</b></div>' +
+        '<div class="stat"><span>Muertos</span><b style="color:#9ca3af">' + td.toLocaleString('es') + '</b></div>' +
+        '<div class="stat"><span>Recuperados</span><b style="color:#34d399">' + tr.toLocaleString('es') + '</b></div>';
+    } catch (e) {
+      document.getElementById('totales').textContent = 'No se pudieron cargar los datos.';
+    }
+  }
+  cargar();
 </script>
