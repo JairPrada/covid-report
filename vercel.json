@@ -5,11 +5,6 @@
       "PYTHON_VERSION": "3.11"
     }
   },
-  "functions": {
-      "api/index.py": {
-        "runtime": "@vercel/python@9.2.0"
-      }
-  },
   "buildCommand": "python manage.py collectstatic --noinput || true",
   "rewrites": [
     {
