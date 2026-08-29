@@ -29,8 +29,10 @@
         </div>
       </div>
     <div id="map" class="map" style="height: 100vh"></div>
+    <!-- Google Maps key: set GOOGLE_MAPS_API_KEY in Vercel env and inject at build,
+         or restrict the key by HTTP referrer in GCP Cloud Console (recommended). -->
     <script
-      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyA_uObeXDFvHT96bNUTNkIFN1I2gucwib0&callback=initMap&libraries=&v=weekly"
+      src="https://maps.googleapis.com/maps/api/js?key=REPLACE_WITH_GOOGLE_MAPS_API_KEY&callback=initMap&libraries=&v=weekly"
       defer
     ></script>
 
